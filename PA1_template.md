@@ -1,15 +1,11 @@
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+# Reproducible Research: Peer Assessment 1
 
 
 ## Loading and preprocessing the data
 The data is read into a dataframe named "data" and the intervals are turned into 4 characters ("5" turns into "0005").
 
-```{r}
+
+```r
 ######  Read and tidy the data ##############
 data <- read.csv("C:/Users/Michael/RepResearch/RepData_PeerAssessment1/activity.csv", stringsAsFactors = FALSE)
 data$interval <- sprintf("%04d", data$interval)
@@ -21,7 +17,8 @@ data$interval <- sprintf("%04d", data$interval)
 The number of steps per day is calculated by finding unique dates in the raw data and  creating a loop that goes through each day adds up the number of steps. The sum function is set to ignore the NA vlues by default, however there are several days where the Fitbit may not have been turned on and there is no data at all. The sum function would return NA in this case and the total steps for those days are set to zero. I debated dropping these out of the histogram but decided since several other days have large numbers of NA's that I would leave any changes for the later parts of the project.
 
 
-```{r}
+
+```r
 ######  Compute steps per day 
 day <- unique(data$date)    # the dates that occur
 databyday <- data.frame()  # Creates new dataframe with just dates and steps per day
@@ -37,20 +34,21 @@ for(i in 1:length(day))
 names(databyday) <- c("date", "steps") 
 mean <- mean(databyday$steps, na.rm = TRUE)      ## computes median and mean
 median <- median(databyday$steps, na.rm = TRUE)
-
 ```
 
 Here is a histogram of the data.
 
-```{r}
+
+```r
 ###### Histogram ####################
 hist(databyday$steps, breaks = 20, xlab = "steps per day", main = "Steps per day")
-
 ```
 
-The mean number of steps per day is `r sprintf("%5.2f",mean)`. 
+![](PA1_template_files/figure-html/unnamed-chunk-3-1.png) 
 
-The median number of steps per day is `r sprintf("%5.2f",median)`.
+The mean number of steps per day is 9354.23. 
+
+The median number of steps per day is 10395.00.
 
 ## What is the average daily activity pattern?
 
@@ -59,7 +57,8 @@ a row for each interval, containing the mean and median for that interval across
 
 
 
-```{r}
+
+```r
 ################   Activity pattern   #################
 ##### Find averages for each interval
 int <- unique(data$interval)
@@ -78,36 +77,44 @@ maxmedinterval <- databyint[which.max(databyint$median),1]
 
 Here is a plot of the mean steps in a 5 minute interval by interval, or time of day.
 
-```{r}
+
+```r
 with(databyint, 
          {plot(number, mean, type= "l", xlab = "interval" )}
     )
 ```
 
-The interval with the maximum mean number of steps is `r maxmeaninterval`, which is seen as the x-value of the peak on the plot.
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+
+The interval with the maximum mean number of steps is 0835, which is seen as the x-value of the peak on the plot.
 
 Here is a plot of the median steps in a 5 minute interval by interval, or time of day.
 
-```{r}
+
+```r
 with(databyint, 
           {plot(number, median, type= "l", xlab = "interval" )}
     )
 ```
 
-The interval with the maximum median number of steps is `r maxmedinterval`, which is also the x-value of the peak on the plot. 
+![](PA1_template_files/figure-html/unnamed-chunk-6-1.png) 
+
+The interval with the maximum median number of steps is 0845, which is also the x-value of the peak on the plot. 
 
 However, it is very interesting to see these are not the same and that the median is almost always lower by quite a bit. To jump ahead the graph of the median matches more closely with weekday activity.
 
 ## Imputing missing values
 
-```{r}
+
+```r
 numberNA <- length(complete.cases(data$steps)[complete.cases(data$steps) == FALSE])
 ```
 Since the data is has many NA values it would be nice to replace them.
 
-There are `r numberNA` NA's occuring in the data.
+There are 2304 NA's occuring in the data.
 
-```{r}
+
+```r
 imputed <- data        
 for(k in 1:nrow(data))
   {
@@ -130,14 +137,17 @@ imputedmedian <- median(imputedbyday$steps, na.rm = TRUE)
 
 Once the values have been replaced, the histogram of steps per day now looks like this
 
-```{r}
+
+```r
 par(mfcol = c(1, 1))
 hist(imputedbyday$steps, breaks = 20, xlab = "steps per day", main = "Steps per day")
 ```
 
-The mean steps per day is `r sprintf("%5.2f",imputedmean)` compared with the original vaue of `r sprintf("%5.2f",mean)`.
+![](PA1_template_files/figure-html/unnamed-chunk-9-1.png) 
 
-The median steps per day is `r sprintf("%5.2f",imputedmedian)` compared with the original vaue of `r sprintf("%5.2f",median)`.
+The mean steps per day is 10766.19 compared with the original vaue of 9354.23.
+
+The median steps per day is 10766.19 compared with the original vaue of 10395.00.
 
 Both values have now changed to the value obtained by replacing all the data in a day.
 
@@ -147,7 +157,8 @@ Both values have now changed to the value obtained by replacing all the data in 
 As one might expect for a working person, the daily activity is highly dependent on
 whether or not that day is a weekday or not. 
 
-```{r}
+
+```r
 ############## Code block 5: Weekday/weekend patterns
 imputed$date <- as.Date(imputed$date)
 #### define a factor variable based on whether the date is a weekday or not 
@@ -184,7 +195,8 @@ weimputedbyint$number <- strptime(weimputedbyint$interval, format = "%H%M")
 
 Splitting the data into weekend days and weekdays, the activity pattern using the mean steps per interval looks like this.
 
-```{r}
+
+```r
 par(mfcol = c(2, 1))
 plot(wdimputedbyint$number, 
      wdimputedbyint$mean, 
@@ -200,9 +212,12 @@ plot(weimputedbyint$number,
      ylab = "steps")
 ```
 
+![](PA1_template_files/figure-html/unnamed-chunk-11-1.png) 
+
 Using the median steps per interval it looks like this.
 
-```{r}
+
+```r
 par(mfcol = c(2, 1))
 plot(wdimputedbyint$number, 
      wdimputedbyint$median, 
@@ -217,3 +232,5 @@ plot(weimputedbyint$number,
      xlab = "interval",
      ylab = "steps")
 ```
+
+![](PA1_template_files/figure-html/unnamed-chunk-12-1.png) 
